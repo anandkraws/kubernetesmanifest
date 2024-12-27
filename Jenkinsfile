@@ -3,6 +3,8 @@ node {
 
     stage('Clone repository') {
         checkout scm
+        // Ensure we're on the correct branch (e.g., main)
+        sh "git checkout main || git checkout -b main"  // Checkout main, or create it if it doesn't exist
     }
 
     stage('Update GIT') {
@@ -26,10 +28,16 @@ node {
                     sh "git add ."
                     sh "git commit -m 'Done by Jenkins Job changemanifest: ${env.BUILD_NUMBER}'"
 
-                    // Push the changes to the GitHub repository
-                    sh """
-                        git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${GIT_USERNAME}/kubernetesmanifest.git HEAD:main
-                    """
+                    // If there are no changes to commit, this will fail with exit code 1. Handle it:
+                    script {
+                        def gitStatus = sh(script: 'git status --porcelain', returnStdout: true).trim()
+                        if (gitStatus) {
+                            // If there are changes to commit, push them
+                            sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${GIT_USERNAME}/kubernetesmanifest.git HEAD:main"
+                        } else {
+                            echo "No changes to commit"
+                        }
+                    }
                 }
             }
         }
