@@ -13,8 +13,8 @@ node {
                 // Use Jenkins credentials securely
                 withCredentials([usernamePassword(credentialsId: 'git_token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                     // Configure Git user details with updated email and username
-                    sh "git config user.email 'anandkraws@gmail.com'"
-                    sh "git config user.name 'anandkraws'"
+                    sh "git config user.email 'anandkraws@gmail.com'"  // Use your GitHub email
+                    sh "git config user.name 'anandkraws'"  // Use your GitHub username (not the email)
 
                     // Print the deployment.yaml to check the current content
                     sh "cat deployment.yaml"
