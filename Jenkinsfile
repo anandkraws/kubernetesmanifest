@@ -24,14 +24,14 @@ node {
                     // Verify the change after sed
                     sh "cat deployment.yaml"
 
-                    // Ensure pull strategy is merge (we'll use merge to handle divergent branches)
+                    // Ensure pull strategy is merge (we'll use merge when pulling)
                     sh "git config pull.rebase false"  // Use merge when pulling
 
-                    // Pull the latest changes from the remote repository and merge them
-                    sh """
-                        git fetch origin  // Fetch remote changes first
-                        git pull origin main  // Merge remote changes into local main branch
-                    """
+                    // Fetch the latest changes from the remote repository
+                    sh "git fetch origin"  // Fetch remote changes first
+
+                    // Merge the remote main branch into local main
+                    sh "git pull origin main"  // Merge remote changes into local main branch
 
                     // Check the git status to determine if we have changes to commit
                     def gitStatus = sh(script: 'git status --porcelain', returnStdout: true).trim()
