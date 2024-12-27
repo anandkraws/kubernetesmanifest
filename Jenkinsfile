@@ -12,9 +12,9 @@ node {
             catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                 // Use Jenkins credentials securely
                 withCredentials([usernamePassword(credentialsId: 'git_token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-                    // Configure Git user details with updated email and username
-                    sh "git config user.email 'anandkraws@gmail.com'"  // Use your GitHub email
-                    sh "git config user.name 'anandkraws'"  // Use your GitHub username (not the email)
+                    // Configure Git user details
+                    sh "git config user.email 'anandkraws@gmail.com'"
+                    sh "git config user.name 'anandkraws'"  // Correct GitHub username (not email)
 
                     // Print the deployment.yaml to check the current content
                     sh "cat deployment.yaml"
@@ -33,10 +33,10 @@ node {
                         sh "git add ."
                         sh "git commit -m 'Done by Jenkins Job changemanifest: ${env.BUILD_NUMBER}'"
 
-                        // Use GitHub's HTTPS method for authentication, securely handling the credentials
+                        // Ensure the repository URL uses credentials explicitly
                         sh """
-                            git config --global credential.helper 'cache --timeout=3600' 
-                            git push https://github.com/${GIT_USERNAME}/kubernetesmanifest.git HEAD:main
+                            git config --global credential.helper 'cache --timeout=3600'
+                            git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/anandkraws/kubernetesmanifest.git HEAD:main
                         """
                     } else {
                         echo "No changes to commit"
