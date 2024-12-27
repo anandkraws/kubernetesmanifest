@@ -15,6 +15,12 @@ node {
                     sh "git config user.email 'anandkraws@gmail.com'"
                     sh "git config user.name 'anandkraws'"  // Correct GitHub username (not email)
 
+                    // Discard any local changes (e.g., deployment.yaml)
+                    sh "git reset --hard"  // This will reset the working directory to the latest commit and discard all changes.
+
+                    // Pull the latest changes from the remote main branch
+                    sh "git pull origin main"  // This will merge the remote changes into the local branch
+
                     // Print the deployment.yaml to check the current content
                     sh "cat deployment.yaml"
 
@@ -23,15 +29,6 @@ node {
 
                     // Verify the change after sed
                     sh "cat deployment.yaml"
-
-                    // Ensure pull strategy is merge (we'll use merge when pulling)
-                    sh "git config pull.rebase false"  // Use merge when pulling
-
-                    // Fetch the latest changes from the remote repository
-                    sh "git fetch origin"  // Fetch remote changes first
-
-                    // Merge the remote main branch into local main
-                    sh "git pull origin main"  // Merge remote changes into local main branch
 
                     // Check the git status to determine if we have changes to commit
                     def gitStatus = sh(script: 'git status --porcelain', returnStdout: true).trim()
