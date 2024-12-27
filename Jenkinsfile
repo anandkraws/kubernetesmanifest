@@ -36,7 +36,7 @@ node {
                         // Use GitHub's HTTPS method for authentication, securely handling the credentials
                         sh """
                             git config --global credential.helper 'cache --timeout=3600' 
-                            git push https://github.com/anandkraws/kubernetesmanifest.git HEAD:main
+                            git push https://github.com/${GIT_USERNAME}/kubernetesmanifest.git HEAD:main
                         """
                     } else {
                         echo "No changes to commit"
