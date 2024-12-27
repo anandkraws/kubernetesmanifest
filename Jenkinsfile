@@ -10,7 +10,6 @@ node {
     stage('Update GIT') {
         script {
             catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                // Use Jenkins credentials securely
                 withCredentials([usernamePassword(credentialsId: 'git_token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                     // Configure Git user details
                     sh "git config user.email 'anandkraws@gmail.com'"
@@ -25,11 +24,15 @@ node {
                     // Verify the change after sed
                     sh "cat deployment.yaml"
 
-                    // Fetch the latest changes from the remote repository to avoid non-fast-forward errors
+                    // Fetch the latest changes from the remote repository
                     sh "git fetch origin"
 
-                    // Attempt to merge the remote changes with your local branch (this will not overwrite local changes)
-                    sh "git merge origin/main || true" // Use `|| true` to continue even if merge conflicts occur
+                    // Merge the latest changes into your local branch
+                    // If you want to merge, use:
+                    sh "git merge origin/main || true"
+
+                    // Alternatively, you can use `git pull` instead of `fetch + merge`
+                    // sh "git pull origin main || true"
 
                     // Check if there are any changes to commit
                     def gitStatus = sh(script: 'git status --porcelain', returnStdout: true).trim()
