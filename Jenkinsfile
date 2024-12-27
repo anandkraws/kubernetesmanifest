@@ -33,10 +33,9 @@ node {
                         sh "git add ."
                         sh "git commit -m 'Done by Jenkins Job changemanifest: ${env.BUILD_NUMBER}'"
 
-                        // Use Git's credential helper to avoid embedding credentials in the URL
+                        // Use GitHub's HTTPS method for authentication, securely handling the credentials
                         sh """
-                            git config --global credential.helper 'store --file=.git-credentials'
-                            echo "https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com" > .git-credentials
+                            git config --global credential.helper 'cache --timeout=3600' 
                             git push https://github.com/${GIT_USERNAME}/kubernetesmanifest.git HEAD:main
                         """
                     } else {
