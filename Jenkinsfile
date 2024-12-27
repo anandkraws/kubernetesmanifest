@@ -25,6 +25,12 @@ node {
                     // Verify the change after sed
                     sh "cat deployment.yaml"
 
+                    // Fetch the latest changes from the remote repository to avoid non-fast-forward errors
+                    sh "git fetch origin"
+
+                    // Attempt to merge the remote changes with your local branch (this will not overwrite local changes)
+                    sh "git merge origin/main || true" // Use `|| true` to continue even if merge conflicts occur
+
                     // Check if there are any changes to commit
                     def gitStatus = sh(script: 'git status --porcelain', returnStdout: true).trim()
 
