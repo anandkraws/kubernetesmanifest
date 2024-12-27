@@ -24,32 +24,27 @@ node {
                     // Verify the change after sed
                     sh "cat deployment.yaml"
 
-                    // Fetch the latest changes from the remote repository
-                    sh "git fetch origin"
+                    // Pull the latest changes from the remote repository and merge them
+                    sh """
+                        git pull origin main
+                    """
 
-                    // Merge the latest changes into your local branch
-                    // If you want to merge, use:
-                    sh "git merge origin/main || true"
-
-                    // Alternatively, you can use `git pull` instead of `fetch + merge`
-                    // sh "git pull origin main || true"
-
-                    // Check if there are any changes to commit
+                    // Commit local changes before attempting to push
                     def gitStatus = sh(script: 'git status --porcelain', returnStdout: true).trim()
 
-                    // If there are changes to commit, stage, commit, and push
                     if (gitStatus) {
+                        // Stage and commit the changes if there are any
                         sh "git add ."
                         sh "git commit -m 'Done by Jenkins Job changemanifest: ${env.BUILD_NUMBER}'"
-
-                        // Ensure the repository URL uses credentials explicitly
-                        sh """
-                            git config --global credential.helper 'cache --timeout=3600'
-                            git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/anandkraws/kubernetesmanifest.git HEAD:main
-                        """
                     } else {
-                        echo "No changes to commit"
+                        echo "No local changes to commit"
                     }
+
+                    // Push changes to the remote repository
+                    sh """
+                        git config --global credential.helper 'cache --timeout=3600'
+                        git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/anandkraws/kubernetesmanifest.git HEAD:main
+                    """
                 }
             }
         }
