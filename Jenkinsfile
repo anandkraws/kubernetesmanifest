@@ -15,37 +15,33 @@ node {
                     sh "git config user.email 'anandkraws@gmail.com'"
                     sh "git config user.name 'anandkraws'"  // Correct GitHub username (not email)
 
-                    // Discard any local changes (e.g., deployment.yaml)
+                    // Discard any local changes (including merge conflicts)
                     sh "git reset --hard"  // This will reset the working directory to the latest commit and discard all changes.
-
+                    
                     // Pull the latest changes from the remote main branch
                     sh "git pull origin main"  // This will merge the remote changes into the local branch
 
-                    // Print the deployment.yaml to check the current content
-                    sh "cat deployment.yaml"
-
-                    // Modify the deployment.yaml using sed (replacing docker image tag)
-                    sh "sed -i 's+anandkraws/python_app.*+anandkraws/python_app:${DOCKERTAG}+g' deployment.yaml"
-
-                    // Verify the change after sed
-                    sh "cat deployment.yaml"
-
-                    // Check the git status to determine if we have changes to commit
+                    // Check for conflicts
                     def gitStatus = sh(script: 'git status --porcelain', returnStdout: true).trim()
 
                     if (gitStatus) {
-                        // Stage and commit the changes if there are any
+                        echo "There were no conflicts and changes were successfully merged."
+
+                        // Modify the deployment.yaml using sed (replacing docker image tag)
+                        sh "sed -i 's+anandkraws/python_app.*+anandkraws/python_app:${DOCKERTAG}+g' deployment.yaml"
+
+                        // Commit the changes
                         sh "git add ."
                         sh "git commit -m 'Done by Jenkins Job changemanifest: ${env.BUILD_NUMBER}'"
+
+                        // Push changes to the remote repository
+                        sh """
+                            git config --global credential.helper 'cache --timeout=3600'
+                            git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/anandkraws/kubernetesmanifest.git HEAD:main
+                        """
                     } else {
                         echo "No local changes to commit"
                     }
-
-                    // Push changes to the remote repository
-                    sh """
-                        git config --global credential.helper 'cache --timeout=3600'
-                        git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/anandkraws/kubernetesmanifest.git HEAD:main
-                    """
                 }
             }
         }
