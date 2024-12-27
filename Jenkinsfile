@@ -11,9 +11,9 @@ node {
         script {
             catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                 withCredentials([usernamePassword(credentialsId: 'git_token', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                    // Configure Git user details
-                    sh "git config user.email 'raj@cloudwithraj.com'"
-                    sh "git config user.name 'RajSaha'"
+                    // Configure Git user details with updated email and username
+                    sh "git config user.email 'anandkraws@gmail.com'"
+                    sh "git config user.name 'anandkraws'"
 
                     // Print the deployment.yaml to check the current content
                     sh "cat deployment.yaml"
@@ -24,19 +24,17 @@ node {
                     // Verify the change after sed
                     sh "cat deployment.yaml"
 
-                    // Stage the changes and commit
-                    sh "git add ."
-                    sh "git commit -m 'Done by Jenkins Job changemanifest: ${env.BUILD_NUMBER}'"
+                    // Check if there are any changes to commit
+                    def gitStatus = sh(script: 'git status --porcelain', returnStdout: true).trim()
 
-                    // If there are no changes to commit, this will fail with exit code 1. Handle it:
-                    script {
-                        def gitStatus = sh(script: 'git status --porcelain', returnStdout: true).trim()
-                        if (gitStatus) {
-                            // If there are changes to commit, push them
-                            sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${GIT_USERNAME}/kubernetesmanifest.git HEAD:main"
-                        } else {
-                            echo "No changes to commit"
-                        }
+                    // If there are changes to commit, stage, commit, and push
+                    if (gitStatus) {
+                        sh "git add ."
+                        sh "git commit -m 'Done by Jenkins Job changemanifest: ${env.BUILD_NUMBER}'"
+                        // Push the changes to GitHub
+                        sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${GIT_USERNAME}/kubernetesmanifest.git HEAD:main"
+                    } else {
+                        echo "No changes to commit"
                     }
                 }
             }
